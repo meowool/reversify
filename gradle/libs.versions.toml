@@ -1,0 +1,36 @@
+[versions]
+agp = "8.4.1"
+kotlin = "2.0.0"
+google-ksp = "2.0.0-1.0.21"
+square-kotlinpoet = "1.17.0"
+
+[libraries]
+### Kotlin
+kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+### AndroidX
+androidx-core = "androidx.core:core-ktx:1.13.1"
+androidx-annotation = "androidx.annotation:annotation:1.8.0"
+### Google
+google-ksp = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "google-ksp" }
+google-ksp-gradle-plugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "google-ksp" }
+### Square
+square-kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "square-kotlinpoet" }
+square-kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "square-kotlinpoet" }
+### Build system
+# This is basically only used in modules related to "building logic"
+android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+### Others
+fastutil = "it.unimi.dsi:fastutil-core:8.5.13"
+auto-service = "dev.zacsweers.autoservice:auto-service-ksp:1.1.0"
+auto-service-annotations = "com.google.auto.service:auto-service-annotations:1.1.1"
+## Testing
+assertk = "com.willowtreeapps.assertk:assertk:0.28.1"
+assertj = "org.assertj:assertj-core:3.25.3"
+
+[bundles]
+ksp = [
+  "google-ksp",
+  "square-kotlinpoet-ksp",
+]

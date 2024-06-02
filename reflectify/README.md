@@ -78,7 +78,7 @@ value class ContextImpl(val target: Any) : Reflectify(targetClass = "android.app
 }
 ```
 
-By calling the `contract.` methods provided by the contract, Reflectify will automatically replace them with the appropriate reflection logic during the compilation process. Here's a simplified pseudo-code of how it might work:
+By calling the `contract.` functions provided by the contract, Reflectify will automatically replace them with the appropriate reflection logic during the compilation process. Here's a simplified pseudo-code of how it might work:
 
 ```kotlin
 @JvmInline
@@ -198,21 +198,44 @@ value class ContextImpl(val target: Any) : Reflectify(targetClass = "android.app
 
 #### Defining Dynamic Signatures
 
-Typically, there are some more challenging situations in the real reverse engineering. For example, for obfuscated members, we may not know their actual names and types before running, so we can only use variables as a substitute:
+Typically, there are some more challenging situations in the real reverse engineering. For example, for obfuscated classes or members, we may not know their actual names and types before running, so we can only use variables as a substitute:
 
 ```kotlin
+lateinit var LazyUserDataType: String
+lateinit var LazyUserDataName: String
+lateinit var LazyIdentityType: String
+
 @JvmInline
-value class UserData : Reflectify(targetClass = "...") {
+value class UserData : Reflectify(targetClass = LazyUserDataType) {
   fun toIdentity(): Any = contract.call(
-    name = InferPlaceholder.UserData.name,
-    returns = C.Identity,
+    name = LazyUserDataName,
+    returns = LazyIdentityType,
   )
 }
 ```
 
-In this case, Reflectify cannot generate direct call code during the compilation phase, as it cannot infer the name and return type. Instead, it will fall back to system-level reflection behavior.
+In this case, Reflectify cannot generate direct call code during the compilation phase, as it cannot infer the referenced dynamic values. Instead, it will fall back to system-level reflection behavior.
 
-However, there are exceptions where Reflectify will still generate direct call code if the definition points to a constant instead of a variable.
+**To put it another way**, Reflectify will only generate direct call code if it can evaluate the signatures of the members to be reflected during the compilation phase. Otherwise, it will only use the system-level reflection logic. This includes hard-coded literals, constant references, and some simple property references:
+
+```kotlin
+// Hard-code literal
+@JvmInline value class Foo : Reflectify(targetClass = "com.example.Foo")
+
+// Const reference
+const val FooType = "com.example.Foo"
+@JvmInline value class Foo : Reflectify(targetClass = FooType)
+
+// Simple reference
+val FooType get() = "com.example.Foo"
+val FooType get() {
+  return "com.example.Foo"
+}
+@JvmInline value class Foo : Reflectify(targetClass = FooType)
+
+```
+
+Therefore, all cases outside of these will be treated as **dynamic reflection**.
 
 #### Reflecting Mapping Types between Java and Kotlin
 
